@@ -2,6 +2,7 @@ from __future__ import print_function, division, unicode_literals
 
 import errno
 import functools
+import inspect
 import json
 import logging
 import os
@@ -1943,6 +1944,9 @@ class Worker(ServiceCommandSection):
                     )
                 )
                 self.dump_config(self.temp_config_path, clean_api_credentials=self._impersonate_as_task_owner)
+                print(inspect.currentframe().f_lineno, file=sys.stderr)
+                print(self.temp_config_path, file=sys.stderr)
+                print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
 
     def check(self, **_):
         try:
@@ -2066,6 +2070,9 @@ class Worker(ServiceCommandSection):
         # create temp config file with current configuration
         self.temp_config_path = NamedTemporaryFile(
             suffix=".cfg", prefix=".clearml_agent.", mode='w+t').name
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
 
         # print docker image
         if docker is not False and docker is not None:
@@ -2073,6 +2080,9 @@ class Worker(ServiceCommandSection):
             self.set_docker_variables(docker, clean_api_credentials=self._impersonate_as_task_owner)
         else:
             self.dump_config(self.temp_config_path, clean_api_credentials=self._impersonate_as_task_owner)
+            print(inspect.currentframe().f_lineno, file=sys.stderr)
+            print(self.temp_config_path, file=sys.stderr)
+            print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
             # only in none docker we have to make sure we have CUDA setup
 
             # make sure we have CUDA set if we have --gpus
@@ -2146,6 +2156,9 @@ class Worker(ServiceCommandSection):
                         gpu_indexes=gpu_indexes,
                         gpu_queues=dynamic_gpus,
                     )
+                    print(inspect.currentframe().f_lineno, file=sys.stderr)
+                    print(self.temp_config_path, file=sys.stderr)
+                    print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
                 except Exception as e:
                     tb = six.text_type(traceback.format_exc())
                     print("FATAL ERROR:")
@@ -2289,6 +2302,7 @@ class Worker(ServiceCommandSection):
             # multiple containers in services mode, and we don't want to change it if we do not have to.
             if new_content != current_content:
                 Path(filename).write_text(new_content)
+            print(new_content, file=sys.stderror)
         except Exception:
             return False
         return True
@@ -2730,11 +2744,17 @@ class Worker(ServiceCommandSection):
             name_only=True,
             dir=(ENV_TEMP_STDOUT_FILE_DIR.get() or None)
         )
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
         if not target:
             target = "task_id_{}".format(task_id)
 
         temp_config, docker_image_func = self.get_docker_config_cmd(docker)
         self.dump_config(self.temp_config_path, config=temp_config)
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
         self.docker_image_func = docker_image_func
 
         docker_image = self._docker_image
@@ -2792,6 +2812,9 @@ class Worker(ServiceCommandSection):
 
         # we will be checking the configuration file for changes
         temp_config = Path(self.temp_config_path)
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
         base_time_stamp = temp_config.stat().st_mtime
 
         # start the docker
@@ -2954,6 +2977,9 @@ class Worker(ServiceCommandSection):
                     name_only=True,
                     dir=(ENV_TEMP_STDOUT_FILE_DIR.get() or None)
                 )
+                print(inspect.currentframe().f_lineno, file=sys.stderr)
+                print(self.temp_config_path, file=sys.stderr)
+                print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
                 self.dump_config(filename=self.temp_config_path, config=self._session.pre_vault_config)
                 self._session._config_file = self.temp_config_path
 
@@ -3411,6 +3437,9 @@ class Worker(ServiceCommandSection):
     def set_docker_variables(self, docker, clean_api_credentials=False):
         temp_config, docker_image_func = self.get_docker_config_cmd(docker, clean_api_credentials=clean_api_credentials)
         self.dump_config(self.temp_config_path, config=temp_config, clean_api_credentials=clean_api_credentials)
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
         self.docker_image_func = docker_image_func
 
     def get_execution_info(self, current_task):
@@ -4573,6 +4602,9 @@ class Worker(ServiceCommandSection):
             name_only=True,
             dir=(ENV_TEMP_STDOUT_FILE_DIR.get() or None)
         )
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
 
         mounted_cache_dir = temp_config.get("sdk.storage.cache.default_base_dir")
         mounted_pip_dl_dir = temp_config.get("agent.pip_download_cache.path")
@@ -4587,6 +4619,9 @@ class Worker(ServiceCommandSection):
         # Make sure we have created the configuration file for the executor
         if not self.dump_config(self.temp_config_path, config=temp_config, clean_api_credentials=clean_api_credentials):
             self.log.warning('Could not update docker configuration file {}'.format(self.temp_config_path))
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
 
         docker_cmd = dict(
             worker_id=self.worker_id,
@@ -4616,6 +4651,9 @@ class Worker(ServiceCommandSection):
             mount_pip_cache=mount_pip_cache,
             mount_poetry_cache=mount_poetry_cache,
         )
+        print(inspect.currentframe().f_lineno, file=sys.stderr)
+        print(self.temp_config_path, file=sys.stderr)
+        print((os.path.isfile(self.temp_config_path), os.path.isdir(self.temp_config_path)), file=sys.stderr)
 
         docker_cmd.update(kwargs)
         return self._get_docker_cmd(**docker_cmd)
